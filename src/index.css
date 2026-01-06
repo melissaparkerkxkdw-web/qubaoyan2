@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 允许 Tailwind 处理基础样式，尽管我们主要使用 CDN */
+body {
+  margin: 0;
+  font-family: 'Noto Sans SC', sans-serif;
+}
