@@ -1,9 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* 
+  CRITICAL UPDATE: 
+  已移除 @tailwind 指令，因为我们现在通过 index.html 中的 CDN 加载样式。
+  保留以下自定义滚动条样式以确保美观。
+*/
 
-/* 允许 Tailwind 处理基础样式，尽管我们主要使用 CDN */
+/* Global font smoothing for better readability */
 body {
-  margin: 0;
-  font-family: 'Noto Sans SC', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af; 
 }

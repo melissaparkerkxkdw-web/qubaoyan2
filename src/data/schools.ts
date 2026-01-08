@@ -1,0 +1,421 @@
+import { SchoolData } from '../types';
+
+// 1. Rich Data for Top/Focus Schools (Hand-curated destinations/policies)
+const RICH_SCHOOL_DETAILS: Record<string, Partial<SchoolData>> = {
+  "北京大学": {
+    destinations: "主要去向：清华大学、复旦大学、哈佛大学、斯坦福大学、中国科学院大学。作为国内顶尖学府，深造率极高，海外名校录取颇丰。",
+    policy: "校本部绩点排名要求前50%，英语六级500+，无挂科记录。推免资格包含普通类、支教团、特长生等。"
+  },
+  "清华大学": {
+    destinations: "主要去向：麻省理工、斯坦福、加州理工、北京大学、中国科学院大学。本校留读比例较高，外保多流向海外顶尖高校。",
+    policy: "综合素质测评排名核心，科研成果（论文/专利）有重大加分。推免名额分配向基础学科和前沿交叉学科倾斜。"
+  },
+  "复旦大学": {
+    destinations: "主要去向：北京大学、清华大学、上海交通大学、南京大学。本校医学院及附属医院也是重要去向。",
+    policy: "学分绩点占比80%，综合素质20%。"
+  },
+  "上海交通大学": {
+    destinations: "主要去向：北京大学、清华大学、复旦大学、中国科学院大学。工科学生多选择本校或清华。",
+    policy: "核心课程学分积排名为主，英语水平优异者优先。致远学院等拔尖计划有独立名额。"
+  },
+  "四川大学": {
+    destinations: "主要去向：北京大学、清华大学、复旦大学、上海交通大学、浙江大学。华西医学中心学生多流向协和或复旦。",
+    policy: "综合成绩=学业成绩(70%)+综合素质(30%)。科研论文及国家级竞赛（互联网+、挑战杯）有重大加分权重。"
+  },
+  "武汉大学": {
+    destinations: "主要去向：北京大学、清华大学、本校。法学、测绘、生物等强势学科多保送至专业领域顶尖院校。",
+    policy: "综合成绩=必修课平均学分绩点×85%＋综合素质评分×15%。"
+  },
+  "华中科技大学": {
+    destinations: "主要去向：清华大学、北京大学、上海交通大学、浙江大学。光电、机械等专业保送清华人数较多。",
+    policy: "必修课加权平均分排名。特长生（竞赛金牌）有单列名额。"
+  },
+  "中国科学技术大学": {
+    destinations: "主要去向：中国科学院各研究所、北京大学、清华大学、普林斯顿大学等。出国深造比例极高。",
+    policy: "GPA导向，极其看重数理基础和科研潜力。出国留学不占用保研名额但需提前规划。"
+  },
+  "中国人民大学": {
+    destinations: "主要去向：北京大学、清华大学、本校。人文社科类学生多选择北大或人大本校。",
+    policy: "学分绩点为主，科研成果和人文社科竞赛有加分。"
+  }
+};
+
+// 2. Raw 2026 Rate Data (Parsed from CSV)
+const RAW_DATA_2026: {name: string, rate: number, desc?: string}[] = [
+  { name: "上海理工大学", rate: 5.00 }, // Corrected based on user feedback
+  { name: "中国科学院大学", rate: 72.47 },
+  { name: "北京大学医学部", rate: 72.01 },
+  { name: "北京大学", rate: 67.84 },
+  { name: "中国科学技术大学", rate: 51.76 },
+  { name: "复旦大学", rate: 50.22 },
+  { name: "上海交通大学", rate: 44.36 },
+  { name: "南京大学", rate: 42.75 },
+  { name: "中国人民大学", rate: 42.33 },
+  { name: "同济大学", rate: 40.97 },
+  { name: "浙江大学", rate: 39.55 },
+  { name: "北京科技大学", rate: 38.12 },
+  { name: "北京师范大学 (北京校区)", rate: 38.00 },
+  { name: "中国农业大学", rate: 35.61 },
+  { name: "东北师范大学", rate: 34.98 },
+  { name: "南方科技大学", rate: 34.24 },
+  { name: "东北大学(校本部)", rate: 33.35 },
+  { name: "北京邮电大学", rate: 32.87 },
+  { name: "东南大学", rate: 32.34 },
+  { name: "山东大学(校本部+青岛)", rate: 32.25 },
+  { name: "天津医科大学", rate: 29.90 },
+  { name: "哈尔滨工程大学", rate: 29.83 },
+  { name: "厦门大学", rate: 29.62 },
+  { name: "南开大学", rate: 29.58 },
+  { name: "中国地质大学(北京)", rate: 29.20 },
+  { name: "华东师范大学", rate: 28.98 },
+  { name: "陕西师范大学", rate: 27.83 },
+  { name: "南京航空航天大学", rate: 27.76 },
+  { name: "重庆大学", rate: 26.80 },
+  { name: "华东理工大学", rate: 26.36 },
+  { name: "北京师范大学(珠海校区)", rate: 26.12 },
+  { name: "四川大学", rate: 26.03 },
+  { name: "对外经济贸易大学", rate: 25.91 },
+  { name: "湖南大学", rate: 25.51 },
+  { name: "西北农林科技大学", rate: 25.23 },
+  { name: "中国社会科学院大学", rate: 25.20 },
+  { name: "中国地质大学(武汉)", rate: 25.11 },
+  { name: "中南大学", rate: 25.07 },
+  { name: "上海财经大学", rate: 24.82 },
+  { name: "中国政法大学", rate: 24.65 },
+  { name: "华南理工大学", rate: 24.21 },
+  { name: "中国石油大学(华东)", rate: 24.06 },
+  { name: "大连理工大学", rate: 23.93 },
+  { name: "北京林业大学", rate: 23.87 },
+  { name: "南京农业大学", rate: 23.86 },
+  { name: "中国药科大学", rate: 23.76 },
+  { name: "国际关系学院", rate: 23.74 },
+  { name: "北京工业大学", rate: 23.60 },
+  { name: "东北林业大学", rate: 23.38 },
+  { name: "北京中医药大学", rate: 23.25 },
+  { name: "中国农业大学烟台研究院", rate: 22.30 },
+  { name: "中国海洋大学", rate: 22.09 },
+  { name: "北京化工大学", rate: 21.93 },
+  { name: "吉林大学", rate: 21.29 },
+  { name: "西南财经大学", rate: 21.12 },
+  { name: "西北大学", rate: 20.70 },
+  { name: "上海音乐学院", rate: 20.04 },
+  { name: "华中师范大学", rate: 19.97 },
+  { name: "河海大学", rate: 19.96 },
+  { name: "武汉理工大学", rate: 19.90 },
+  { name: "中国音乐学院", rate: 19.67 },
+  { name: "西南交通大学", rate: 19.58 },
+  { name: "东华大学", rate: 19.45 },
+  { name: "中央美术学院", rate: 19.12 },
+  { name: "江南大学", rate: 18.56 },
+  { name: "中国医科大学", rate: 17.94 },
+  { name: "南昌大学", rate: 17.79 },
+  { name: "合肥工业大学", rate: 17.76 },
+  { name: "苏州大学", rate: 17.19 },
+  { name: "上海大学", rate: 16.94 },
+  { name: "华北电力大学(保定)", rate: 16.91 },
+  { name: "云南大学", rate: 16.81 },
+  { name: "长安大学", rate: 16.73 },
+  { name: "郑州大学", rate: 16.45 },
+  { name: "西北师范大学", rate: 16.44 },
+  { name: "辽宁大学", rate: 15.88 },
+  { name: "河南大学", rate: 15.83 },
+  { name: "中南财经政法大学", rate: 15.80 },
+  { name: "山东大学(威海)", rate: 15.74 },
+  { name: "温州医科大学", rate: 15.21 },
+  { name: "东北财经大学", rate: 15.14 },
+  { name: "内蒙古大学", rate: 15.12 },
+  { name: "四川农业大学", rate: 14.80 },
+  { name: "上海体育大学", rate: 14.74 },
+  { name: "南京医科大学", rate: 14.52 },
+  { name: "山西大学", rate: 14.43 },
+  { name: "中国美术学院", rate: 14.10 },
+  { name: "湖南师范大学", rate: 13.89 },
+  { name: "东北农业大学", rate: 13.75 },
+  { name: "南京中医药大学", rate: 13.49 },
+  { name: "河北工业大学", rate: 13.42 },
+  { name: "重庆医科大学", rate: 13.34 },
+  { name: "太原理工大学", rate: 13.30 },
+  { name: "东北大学(秦皇岛分校)", rate: 13.17 },
+  { name: "南方医科大学", rate: 13.12 },
+  { name: "南京邮电大学", rate: 12.94 },
+  { name: "安徽大学", rate: 12.90 },
+  { name: "湘潭大学", rate: 12.89 },
+  { name: "广州中医药大学", rate: 12.85 },
+  { name: "福州大学", rate: 12.83 },
+  { name: "广西大学", rate: 12.67 },
+  { name: "宁夏医科大学", rate: 12.49 },
+  { name: "石河子大学", rate: 12.20 },
+  { name: "山东师范大学", rate: 12.09 },
+  { name: "上海海洋大学", rate: 12.02 },
+  { name: "成都中医药大学", rate: 11.87 },
+  { name: "燕山大学", rate: 11.81 },
+  { name: "延边大学", rate: 11.28 },
+  { name: "南京林业大学", rate: 10.86 },
+  { name: "暨南大学", rate: 10.84 },
+  { name: "河北大学", rate: 10.69 },
+  { name: "辽宁师范大学", rate: 10.61 },
+  { name: "山西医科大学", rate: 10.55 },
+  { name: "沈阳农业大学", rate: 10.48 },
+  { name: "南京信息工程大学", rate: 10.41 },
+  { name: "河北医科大学", rate: 10.35 },
+  { name: "安徽医科大学", rate: 10.34 },
+  { name: "新疆大学", rate: 10.21 },
+  { name: "安徽财经大学", rate: 10.21 },
+  { name: "贵州大学", rate: 10.01 },
+  { name: "华东政法大学", rate: 9.83 },
+  { name: "首都经济贸易大学", rate: 9.75 },
+  { name: "长江大学", rate: 9.59 },
+  { name: "武汉科技大学", rate: 9.49 },
+  { name: "安徽农业大学", rate: 9.48 },
+  { name: "西南石油大学", rate: 9.42 },
+  { name: "湖北大学", rate: 9.20 },
+  { name: "成都理工大学", rate: 9.16 },
+  { name: "山东农业大学", rate: 9.02 },
+  { name: "青岛大学", rate: 9.00 },
+  { name: "西南政法大学", rate: 9.00 },
+  { name: "河南师范大学", rate: 8.75 },
+  { name: "新疆医科大学", rate: 8.59 },
+  { name: "扬州大学", rate: 8.50 },
+  { name: "安徽师范大学", rate: 8.49 },
+  { name: "宁夏大学", rate: 8.25 },
+  { name: "江苏大学", rate: 8.20 },
+  { name: "北京工商大学", rate: 8.19 },
+  { name: "河北师范大学", rate: 8.14 },
+  { name: "福建中医药大学", rate: 8.05 },
+  { name: "江苏师范大学", rate: 7.97 },
+  { name: "西南科技大学", rate: 7.91 },
+  { name: "江西师范大学", rate: 7.89 },
+  { name: "浙江师范大学", rate: 7.84 },
+  { name: "长春中医药大学", rate: 7.83 },
+  { name: "徐州医科大学", rate: 7.82 },
+  { name: "曲阜师范大学", rate: 7.79 },
+  { name: "江西农业大学", rate: 7.67 },
+  { name: "济南大学", rate: 7.45 },
+  { name: "大连外国语大学", rate: 7.37 },
+  { name: "河南农业大学", rate: 7.35 },
+  { name: "蚌埠医科大学", rate: 7.33 },
+  { name: "华南农业大学", rate: 7.30 },
+  { name: "北京电子科技学院", rate: 7.09 },
+  { name: "吉林农业大学", rate: 7.08 },
+  { name: "山西中医药大学", rate: 7.06 },
+  { name: "四川外国语大学", rate: 7.01 },
+  { name: "华侨大学", rate: 6.91 },
+  { name: "南京艺术学院", rate: 6.89 },
+  { name: "天津体育学院", rate: 6.82 },
+  { name: "沈阳建筑大学", rate: 6.81 },
+  { name: "深圳大学", rate: 6.76 },
+  { name: "江西财经大学", rate: 6.64 },
+  { name: "天津财经大学", rate: 6.64 },
+  { name: "内蒙古农业大学", rate: 6.54 },
+  { name: "湖北工业大学", rate: 6.54 },
+  { name: "三峡大学", rate: 6.52 },
+  { name: "江西理工大学", rate: 6.48 },
+  { name: "湖南中医药大学", rate: 6.43 },
+  { name: "重庆邮电大学", rate: 6.41 },
+  { name: "南昌航空大学", rate: 6.37 },
+  { name: "西安科技大学", rate: 6.35 },
+  { name: "兰州理工大学", rate: 6.34 },
+  { name: "福建农林大学", rate: 6.31 },
+  { name: "青海大学", rate: 6.26 },
+  { name: "山东财经大学", rate: 6.23 },
+  { name: "陕西科技大学", rate: 6.21 },
+  { name: "西华师范大学", rate: 6.19 },
+  { name: "鲁迅美术学院", rate: 6.17 },
+  { name: "汕头大学", rate: 6.01 },
+  { name: "湖北中医药大学", rate: 5.90 },
+  { name: "南通大学", rate: 5.89 },
+  { name: "山西师范大学", rate: 5.88 },
+  { name: "西北政法大学", rate: 5.84 },
+  { name: "东北电力大学", rate: 5.82 },
+  { name: "黑龙江中医药大学", rate: 5.79 },
+  { name: "石家庄铁道大学", rate: 5.79 },
+  { name: "安徽工业大学", rate: 5.76 },
+  { name: "中南民族大学", rate: 5.73 },
+  { name: "西安工程大学", rate: 5.69 },
+  { name: "新疆师范大学", rate: 5.66 },
+  { name: "成都体育学院", rate: 5.63 },
+  { name: "山东建筑大学", rate: 5.63 },
+  { name: "广东外语外贸大学", rate: 5.63 },
+  { name: "昆明理工大学", rate: 5.62 },
+  { name: "天津科技大学", rate: 5.62 },
+  { name: "江苏科技大学", rate: 5.56 },
+  { name: "青岛科技大学", rate: 5.54 },
+  { name: "重庆交通大学", rate: 5.52 },
+  { name: "河北农业大学", rate: 5.52 },
+  { name: "安徽中医药大学", rate: 5.46 },
+  { name: "哈尔滨理工大学", rate: 5.46 },
+  { name: "河北经贸大学", rate: 5.44 },
+  { name: "安徽理工大学", rate: 5.44 },
+  { name: "吉林财经大学", rate: 5.44 },
+  { name: "中北大学", rate: 5.42 },
+  { name: "兰州交通大学", rate: 5.41 },
+  { name: "辽宁中医药大学", rate: 5.40 },
+  { name: "黑龙江八一农垦大学", rate: 5.24 },
+  { name: "大连交通大学", rate: 5.23 },
+  { name: "内蒙古科技大学", rate: 5.21 },
+  { name: "华北水利水电大学", rate: 5.21 },
+  { name: "广西中医药大学", rate: 5.21 },
+  { name: "北京信息科技大学", rate: 5.18 },
+  { name: "青岛理工大学", rate: 5.09 },
+  { name: "四川师范大学", rate: 5.09 },
+  { name: "西安工业大学", rate: 5.06 },
+  { name: "武汉工程大学", rate: 5.06 },
+  { name: "武汉体育学院", rate: 5.03 },
+  { name: "广西师范大学", rate: 4.99 },
+  { name: "山西农业大学", rate: 4.92 },
+  { name: "沈阳工业大学", rate: 4.89 },
+  { name: "重庆师范大学", rate: 4.89 },
+  { name: "哈尔滨师范大学", rate: 4.88 },
+  { name: "辽宁工程技术大学", rate: 4.83 },
+  { name: "山东艺术学院", rate: 4.82 },
+  { name: "华东交通大学", rate: 4.80 },
+  { name: "沈阳化工大学", rate: 4.78 },
+  { name: "江西中医药大学", rate: 4.76 },
+  { name: "华北理工大学", rate: 4.74 },
+  { name: "中南林业科技大学", rate: 4.72 },
+  { name: "聊城大学", rate: 4.72 },
+  { name: "中国民航大学", rate: 4.69 },
+  { name: "河北中医药大学", rate: 4.66 },
+  { name: "西南民族大学", rate: 4.60 },
+  { name: "杭州师范大学", rate: 4.57 },
+  { name: "哈尔滨商业大学", rate: 4.51 },
+  { name: "西安石油大学", rate: 4.50 },
+  { name: "内蒙古工业大学", rate: 4.48 },
+  { name: "延安大学", rate: 4.40 },
+  { name: "河南工业大学", rate: 4.28 },
+  { name: "云南师范大学", rate: 4.24 },
+  { name: "天津商业大学", rate: 4.23 },
+  { name: "新疆农业大学", rate: 4.23 },
+  { name: "广州大学", rate: 4.21 },
+  { name: "湖南科技大学", rate: 4.19 },
+  { name: "长沙理工大学", rate: 4.16 },
+  { name: "湖南农业大学", rate: 4.11 },
+  { name: "太原科技大学", rate: 4.03 },
+  { name: "青海师范大学", rate: 3.93 },
+  { name: "辽宁科技大学", rate: 3.83 },
+  { name: "西北民族大学", rate: 3.59 },
+  { name: "西华大学", rate: 3.54 },
+  { name: "长春工业大学", rate: 3.48 },
+  { name: "东北石油大学", rate: 3.46 },
+  { name: "甘肃中医药大学", rate: 3.35 },
+  { name: "香港中文大学(深圳)", rate: 3.34 },
+  { name: "集美大学", rate: 3.24 },
+  { name: "吉林师范大学", rate: 3.24 },
+  { name: "内蒙古师范大学", rate: 3.22 },
+  { name: "贵州师范大学", rate: 3.09 },
+  { name: "西南林业大学", rate: 3.00 },
+  { name: "黑龙江科技大学", rate: 2.97 },
+  { name: "西藏民族大学", rate: 2.95 },
+  { name: "贵州中医药大学", rate: 2.90 },
+  { name: "吉首大学", rate: 2.82 },
+  { name: "遵义医科大学", rate: 2.78 },
+  { name: "青海民族大学", rate: 2.53 },
+  { name: "云南财经大学", rate: 2.51 },
+  { name: "喀什大学", rate: 2.51 },
+  { name: "桂林理工大学", rate: 2.47 },
+  { name: "云南中医药大学", rate: 2.32 },
+  { name: "广东海洋大学", rate: 2.24 },
+  { name: "佛山大学", rate: 2.12 },
+  { name: "天津职业技术师范大学", rate: 2.12 },
+  { name: "四川音乐学院", rate: 2.09 },
+  { name: "大连大学", rate: 2.07 },
+  { name: "五邑大学", rate: 2.02 },
+  { name: "武汉纺织大学", rate: 2.01 },
+  { name: "北方民族大学", rate: 2.00 },
+  { name: "塔里木大学", rate: 1.99 },
+  { name: "江汉大学", rate: 1.99 },
+  { name: "成都信息工程大学", rate: 1.97 },
+  { name: "河北科技大学", rate: 1.97 },
+  { name: "西安邮电大学", rate: 1.97 },
+  { name: "沈阳音乐学院", rate: 1.97 },
+  { name: "河南医药大学", rate: 1.96 },
+  { name: "湖南工商大学", rate: 1.96 },
+  { name: "北京物资学院", rate: 1.95 },
+  { name: "四川美术学院", rate: 1.92 },
+  { name: "武汉轻工大学", rate: 1.91 },
+  { name: "皖南医学院", rate: 1.91 },
+  { name: "成都大学", rate: 1.89 },
+  { name: "上海应用技术大学", rate: 1.86 },
+  { name: "河北北方学院", rate: 1.85 },
+  { name: "安徽建筑大学", rate: 1.85 },
+  { name: "海南医科大学", rate: 1.83 },
+  { name: "佳木斯大学", rate: 1.80 },
+  { name: "贵州民族大学", rate: 1.80 },
+  { name: "苏州科技大学", rate: 1.79 },
+  { name: "兰州财经大学", rate: 1.79 },
+  { name: "内蒙古医科大学", rate: 1.78 },
+  { name: "郑州轻工业大学", rate: 1.78 },
+  { name: "河北地质大学", rate: 1.76 },
+  { name: "景德镇陶瓷大学", rate: 1.74 },
+  { name: "北华大学", rate: 1.74 },
+  { name: "上海工程技术大学", rate: 1.74 },
+  { name: "内蒙古民族大学", rate: 1.68 },
+  { name: "广西民族大学", rate: 1.68 },
+  { name: "常州大学", rate: 1.57 },
+  { name: "长春师范大学", rate: 1.55 },
+  { name: "广州美术学院", rate: 1.42 },
+  { name: "哈尔滨体育学院", rate: 1.40 },
+  { name: "桂林电子科技大学", rate: 1.00 },
+  { name: "东华理工大学", rate: 0.66 }
+];
+
+// Helper to generate policy text based on rate (for schools without rich data)
+const getPolicyByRate = (rate: number) => {
+  if (rate > 35) return "推免政策通常基于学分绩点(80-85%)+综合素质(15-20%)。作为高保研率院校，名额充裕，鼓励申请清北复交及海外顶尖高校。";
+  if (rate > 20) return "推免依据必修课成绩排名，科研竞赛有额外加分。保研名额较多，竞争主要集中在保外资格，去向以C9及本校为主。";
+  if (rate > 10) return "推免资格竞争较激烈，通常要求专业排名前列(前10%-15%)。英语六级和国家级竞赛奖项是重要加分项，主要流向985/211高校。";
+  if (rate > 5) return "保研名额较少，竞争激烈，通常仅限专业前3-5%。建议尽早准备复习考研，同时争取保研资格作为保底。";
+  return "保研名额极少，通常为年级第一或有特殊学术专长。建议以考研或留学为主，保研为辅。";
+};
+
+// Helper to generate destinations text based on rate (for schools without rich data)
+const getDestinationsByRate = (rate: number, name: string) => {
+  if (rate > 40) return "主要去向：清华大学、北京大学、中国科学院大学、复旦大学、上海交通大学及本校。";
+  if (rate > 25) return "主要去向：C9高校、中科院各所、本校及同层次985/211高校。";
+  if (rate > 10) return "主要去向：本校、对口专业强势的985/211高校、中科院。";
+  return `主要去向：本校、${name}对口合作院校及区域内高水平大学。`;
+};
+
+// Construct the full database
+const buildDatabase = () => {
+  const db: Record<string, SchoolData> = {};
+  
+  RAW_DATA_2026.forEach(item => {
+    const richInfo = RICH_SCHOOL_DETAILS[item.name] || {};
+    db[item.name] = {
+      name: item.name,
+      rate: item.rate,
+      destinations: richInfo.destinations || getDestinationsByRate(item.rate, item.name),
+      policy: richInfo.policy || getPolicyByRate(item.rate),
+      source: "2026届保研数据"
+    };
+  });
+  
+  return db;
+};
+
+export const SCHOOL_DATABASE = buildDatabase();
+
+// IMPORTANT: Fallback to null rate if school not found, so we can trigger AI search
+export const DEFAULT_SCHOOL_DATA: SchoolData = {
+  name: "目标院校",
+  rate: null, 
+  destinations: "暂无精确数据。建议参考同层次高校去向（如985通常流向C9及头部高校，211流向985及本校）。",
+  policy: "请查阅教务处最新《推荐优秀应届本科毕业生免试攻读研究生工作实施办法》。",
+  source: "暂无收录"
+};
+
+export const getSchoolData = (schoolName: string): SchoolData => {
+  // Exact match
+  if (SCHOOL_DATABASE[schoolName]) {
+    return SCHOOL_DATABASE[schoolName];
+  }
+  
+  // Fuzzy match (e.g. user types "北大" for "北京大学")
+  const key = Object.keys(SCHOOL_DATABASE).find(k => k.includes(schoolName) || schoolName.includes(k));
+  if (key) {
+    return SCHOOL_DATABASE[key];
+  }
+
+  return { ...DEFAULT_SCHOOL_DATA, name: schoolName };
+};

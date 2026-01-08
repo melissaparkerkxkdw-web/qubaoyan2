@@ -1,87 +1,73 @@
-export interface UserFormData {
+
+export interface UserInfo {
   name: string;
-  contact: string; 
-  university: string;
+  phone: string;
+  school: string;
   major: string;
-  grade: string; 
-  gpaRanking: string;
-  englishScore: string; 
-  competitions: string;
+  grade: string;
+  rank: string;
+  english: string;
+  competition: string;
   research: string;
-  targetFocus: string; 
+  consultationFocus: string;
 }
 
-export interface ChartDataPoint {
-  label: string;
-  value: number;
+export interface SchoolData {
+  name: string;
+  rate: number | null; 
+  destinations: string;
+  policy: string;
+  source?: string;
 }
 
-export interface DetailedAdvice {
-  title: string;
-  level: '国家级' | '省部级' | '校级';
-  description: string;
+// Updated to support categorized planning
+export interface TimelineItem {
+  stage: string;
+  categoryContent: {
+    gpa: string;
+    english: string;
+    research: string;
+    contest: string;
+  };
 }
 
-export interface BonusPointItem {
-  category: string;
+export interface AdmissionCase {
+  student: string;
+  school: string;
+  major: string;
+  gpa: string;
+  english: string;
+  offer: string;
+}
+
+export interface BonusItem {
   item: string;
   score: string;
+  desc: string;
 }
 
-export interface TimelineItem {
-  period: string;
-  title: string;
-  content: string;
-  tag: string;
+export interface BonusScheme {
+  category: string;
+  items: BonusItem[];
 }
 
-export interface SuccessCase {
-  admissionSchool: string; 
-  admissionMajor: string;  
-  year: string;            
-  originBackground: string; 
-  highlights: string;       
-}
-
-export interface ReportData {
-  summary: string;
-  metrics: {
-    gpaScore: number;
-    researchScore: number;
-    englishScore: number;
-    competitionScore: number;
-    admissionRate: number; 
+export interface AIResponse {
+  // Switched overallAnalysis to SWOT structure
+  swot: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
   };
-  
-  admissionTrend: ChartDataPoint[]; 
-  graduateDestinations: ChartDataPoint[]; 
-  destinationSchools: string[]; 
-  similarCases: SuccessCase[];
-
-  policyAnalysis: string; 
-  bonusPolicy: BonusPointItem[]; 
-  
-  gradeGuidance: string; 
-  timeline: TimelineItem[]; 
-  
-  competitionsRecommended: DetailedAdvice[];
-  researchRecommended: DetailedAdvice[];
-  
-  recommendations: {
-    type: '冲刺' | '稳妥' | '保底';
-    schools: string[];
-    successRate: number; 
-    note: string;
-  }[];
-  career: {
-    direction: string;
-    salaryRange: string;
+  planning: TimelineItem[]; 
+  researchAdvice: string; // Keep as string for rich text formatting
+  competitions: string;
+  bonusScheme: BonusScheme[]; // New field for detailed policy
+  targetSchools: Record<string, string>; 
+  admissionCases: AdmissionCase[]; // New field for success cases
+  missingData?: {
+    rate?: number;
+    policy?: string;
+    destinations?: string;
   };
-  pengpaiPlanRecommended: boolean;
 }
-
-export const CONSTANTS = {
-  FEISHU_WEBHOOK: "https://open.feishu.cn/open-apis/bot/v2/hook/25faa1d2-76d3-4f88-8277-a5a625b6f789",
-  DEEPSEEK_API_KEY: "sk-f2335a96cee0449386e3822542892783",
-  DEEPSEEK_API_URL: "https://api.deepseek.com/chat/completions"
-};
