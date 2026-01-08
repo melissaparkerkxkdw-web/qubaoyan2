@@ -417,22 +417,22 @@ const Report = ({ userInfo, schoolData, aiData }: { userInfo: UserInfo, schoolDa
       slide2.addText("竞争力深度评估 (SWOT)", { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: '003B30' });
       
       // Strengths
-      slide2.addShape(pres.ShapeType.rect, { x: 0.5, y: 1.0, w: 4.5, h: 2.5, fill: 'F0FDF4' });
+      slide2.addShape(pres.ShapeType.rect, { x: 0.5, y: 1.0, w: 4.5, h: 2.5, fill: { color: 'F0FDF4' } });
       slide2.addText("核心优势", { x: 0.6, y: 1.2, fontSize: 14, bold: true, color: '00B36B' });
       slide2.addText(swot.strengths.join("\n"), { x: 0.6, y: 1.5, w: 4.2, fontSize: 12, color: '000000', bullet: true });
 
       // Weaknesses
-      slide2.addShape(pres.ShapeType.rect, { x: 5.2, y: 1.0, w: 4.5, h: 2.5, fill: 'FEF2F2' });
+      slide2.addShape(pres.ShapeType.rect, { x: 5.2, y: 1.0, w: 4.5, h: 2.5, fill: { color: 'FEF2F2' } });
       slide2.addText("劣势短板", { x: 5.3, y: 1.2, fontSize: 14, bold: true, color: 'FF0000' });
       slide2.addText(swot.weaknesses.join("\n"), { x: 5.3, y: 1.5, w: 4.2, fontSize: 12, color: '000000', bullet: true });
 
       // Opportunities
-      slide2.addShape(pres.ShapeType.rect, { x: 0.5, y: 3.7, w: 4.5, h: 2.5, fill: 'EFF6FF' });
+      slide2.addShape(pres.ShapeType.rect, { x: 0.5, y: 3.7, w: 4.5, h: 2.5, fill: { color: 'EFF6FF' } });
       slide2.addText("外部机会", { x: 0.6, y: 3.9, fontSize: 14, bold: true, color: '0000FF' });
       slide2.addText(swot.opportunities.join("\n"), { x: 0.6, y: 4.2, w: 4.2, fontSize: 12, color: '000000', bullet: true });
 
       // Threats
-      slide2.addShape(pres.ShapeType.rect, { x: 5.2, y: 3.7, w: 4.5, h: 2.5, fill: 'FFF7ED' });
+      slide2.addShape(pres.ShapeType.rect, { x: 5.2, y: 3.7, w: 4.5, h: 2.5, fill: { color: 'FFF7ED' } });
       slide2.addText("潜在威胁", { x: 5.3, y: 3.9, fontSize: 14, bold: true, color: 'FFA500' });
       slide2.addText(swot.threats.join("\n"), { x: 5.3, y: 4.2, w: 4.2, fontSize: 12, color: '000000', bullet: true });
 
@@ -465,7 +465,7 @@ const Report = ({ userInfo, schoolData, aiData }: { userInfo: UserInfo, schoolDa
 
       schools.forEach((s, i) => {
          const xPos = 0.5 + (i * 3.2);
-         slide4.addShape(pres.ShapeType.rect, { x: xPos, y: 1.2, w: 3, h: 4, fill: 'FFFFFF', line: { color: s.color, width: 2 } });
+         slide4.addShape(pres.ShapeType.rect, { x: xPos, y: 1.2, w: 3, h: 4, fill: { color: 'FFFFFF' }, line: { color: s.color, width: 2 } });
          slide4.addText(s.title, { x: xPos + 0.2, y: 1.5, fontSize: 16, bold: true, color: s.color });
          slide4.addText(s.data, { x: xPos + 0.2, y: 2.0, w: 2.6, fontSize: 12 });
       });
