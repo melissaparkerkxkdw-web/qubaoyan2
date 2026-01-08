@@ -465,6 +465,7 @@ const Report = ({ userInfo, schoolData, aiData }: { userInfo: UserInfo, schoolDa
 
       schools.forEach((s, i) => {
          const xPos = 0.5 + (i * 3.2);
+         // FIX: fill must be an object { color: '...' }
          slide4.addShape(pres.ShapeType.rect, { x: xPos, y: 1.2, w: 3, h: 4, fill: { color: 'FFFFFF' }, line: { color: s.color, width: 2 } });
          slide4.addText(s.title, { x: xPos + 0.2, y: 1.5, fontSize: 16, bold: true, color: s.color });
          slide4.addText(s.data, { x: xPos + 0.2, y: 2.0, w: 2.6, fontSize: 12 });
