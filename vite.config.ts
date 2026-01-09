@@ -17,7 +17,7 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           charts: ['recharts'],
-          utils: ['html2canvas', 'jspdf', 'pptxgenjs']
+          utils: ['html2canvas', 'jspdf']
         }
       }
     }

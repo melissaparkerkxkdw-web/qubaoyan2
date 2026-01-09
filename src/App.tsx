@@ -7,10 +7,9 @@ import { UserInfo, AIResponse, SchoolData, TimelineItem } from './types';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer 
 } from 'recharts';
-import { Loader2, Download, CheckCircle2, Trophy, BookOpen, Clock, Sparkles, ShieldCheck, BadgeCheck, ChevronRight, Microscope, ArrowUpRight, ArrowDownRight, Zap, ShieldAlert, Star, FileText, Activity, GraduationCap, Users, Presentation, Compass, Target } from 'lucide-react';
+import { Loader2, Download, CheckCircle2, Trophy, BookOpen, Clock, Sparkles, ShieldCheck, BadgeCheck, ChevronRight, Microscope, ArrowUpRight, ArrowDownRight, Zap, ShieldAlert, Star, FileText, Activity, Users, Compass, Target } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import PptxGenJS from 'pptxgenjs';
 
 // --- Assets & Branding ---
 const BRAND_GREEN_DARK = "#003B30"; 
@@ -309,9 +308,7 @@ const SinglePageForm = ({ onComplete }: { onComplete: (data: UserInfo) => void }
 // --- Report Component (Rich Layout) ---
 const Report = ({ userInfo, schoolData, aiData }: { userInfo: UserInfo, schoolData: SchoolData, aiData: AIResponse }) => {
   const reportRef = useRef<HTMLDivElement>(null);
-  const radarRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
-  const [pptGenerating, setPptGenerating] = useState(false);
 
   const displayRate = aiData.missingData?.rate || schoolData.rate;
   const displayPolicy = aiData.missingData?.policy || schoolData.policy;
@@ -397,101 +394,6 @@ const Report = ({ userInfo, schoolData, aiData }: { userInfo: UserInfo, schoolDa
     }
   };
 
-  // --- PPT Generation (Native) ---
-  const handleDownloadPPT = async () => {
-    setPptGenerating(true);
-    try {
-      const pres = new PptxGenJS();
-      pres.layout = 'LAYOUT_16x9';
-      pres.title = `保研规划报告 - ${userInfo.name}`;
-
-      // 1. Cover Slide
-      const slide1 = pres.addSlide();
-      slide1.background = { color: '003B30' };
-      slide1.addText("保研定位与发展规划", { x: 1, y: 2.5, w: '80%', fontSize: 44, color: 'FFFFFF', bold: true });
-      slide1.addText(`申请人：${userInfo.name} | 本科：${userInfo.school} | 专业：${userInfo.major}`, { x: 1, y: 3.5, w: '80%', fontSize: 18, color: 'AAAAAA' });
-      slide1.addText("高顿去保研 · 智能大数据决策系统", { x: 1, y: 5.5, fontSize: 14, color: '00B36B' });
-
-      // 2. SWOT Slide
-      const slide2 = pres.addSlide();
-      slide2.addText("竞争力深度评估 (SWOT)", { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: '003B30' });
-      
-      // Strengths
-      slide2.addShape(pres.ShapeType.rect, { x: 0.5, y: 1.0, w: 4.5, h: 2.5, fill: { color: 'F0FDF4' } });
-      slide2.addText("核心优势", { x: 0.6, y: 1.2, fontSize: 14, bold: true, color: '00B36B' });
-      slide2.addText(swot.strengths.join("\n"), { x: 0.6, y: 1.5, w: 4.2, fontSize: 12, color: '000000', bullet: true });
-
-      // Weaknesses
-      slide2.addShape(pres.ShapeType.rect, { x: 5.2, y: 1.0, w: 4.5, h: 2.5, fill: { color: 'FEF2F2' } });
-      slide2.addText("劣势短板", { x: 5.3, y: 1.2, fontSize: 14, bold: true, color: 'FF0000' });
-      slide2.addText(swot.weaknesses.join("\n"), { x: 5.3, y: 1.5, w: 4.2, fontSize: 12, color: '000000', bullet: true });
-
-      // Opportunities
-      slide2.addShape(pres.ShapeType.rect, { x: 0.5, y: 3.7, w: 4.5, h: 2.5, fill: { color: 'EFF6FF' } });
-      slide2.addText("外部机会", { x: 0.6, y: 3.9, fontSize: 14, bold: true, color: '0000FF' });
-      slide2.addText(swot.opportunities.join("\n"), { x: 0.6, y: 4.2, w: 4.2, fontSize: 12, color: '000000', bullet: true });
-
-      // Threats
-      slide2.addShape(pres.ShapeType.rect, { x: 5.2, y: 3.7, w: 4.5, h: 2.5, fill: { color: 'FFF7ED' } });
-      slide2.addText("潜在威胁", { x: 5.3, y: 3.9, fontSize: 14, bold: true, color: 'FFA500' });
-      slide2.addText(swot.threats.join("\n"), { x: 5.3, y: 4.2, w: 4.2, fontSize: 12, color: '000000', bullet: true });
-
-      // 3. Radar Chart & Policy
-      const slide3 = pres.addSlide();
-      slide3.addText("推免政策与竞争力模型", { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: '003B30' });
-      
-      // Capture Radar (if available)
-      if (radarRef.current) {
-        const radarCanvas = await html2canvas(radarRef.current, { backgroundColor: null });
-        const radarImg = radarCanvas.toDataURL('image/png');
-        slide3.addImage({ data: radarImg, x: 0.5, y: 1.2, w: 4, h: 3 });
-      }
-
-      slide3.addText("预估保研率: " + currentRate + "%", { x: 5, y: 1.2, fontSize: 18, bold: true, color: '00B36B' });
-      slide3.addText("核心去向:", { x: 5, y: 1.8, fontSize: 14, bold: true });
-      slide3.addText(displayDestinations, { x: 5, y: 2.2, w: 4.5, fontSize: 11 });
-      slide3.addText("政策重点:", { x: 5, y: 3.5, fontSize: 14, bold: true });
-      slide3.addText(displayPolicy.substring(0, 300) + "...", { x: 5, y: 3.9, w: 4.5, fontSize: 11 });
-
-      // 4. Target Schools
-      const slide4 = pres.addSlide();
-      slide4.addText("目标院校定位", { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: '003B30' });
-      
-      const schools = [
-         { title: "冲刺 (Sprint)", data: targetSchools['冲刺院校'], color: 'FF4D4F' },
-         { title: "稳妥 (Stable)", data: targetSchools['稳妥院校'], color: '1890FF' },
-         { title: "保底 (Backup)", data: targetSchools['保底院校'], color: '52C41A' }
-      ];
-
-      schools.forEach((s, i) => {
-         const xPos = 0.5 + (i * 3.2);
-         // FIX: fill must be an object { color: '...' }
-         slide4.addShape(pres.ShapeType.rect, { x: xPos, y: 1.2, w: 3, h: 4, fill: { color: 'FFFFFF' }, line: { color: s.color, width: 2 } });
-         slide4.addText(s.title, { x: xPos + 0.2, y: 1.5, fontSize: 16, bold: true, color: s.color });
-         slide4.addText(s.data, { x: xPos + 0.2, y: 2.0, w: 2.6, fontSize: 12 });
-      });
-
-      // 5. Timeline
-      const slide5 = pres.addSlide();
-      slide5.addText("阶段性规划", { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: '003B30' });
-      
-      planningItems.forEach((item, i) => {
-         const yPos = 1.2 + (i * 1.5);
-         slide5.addText(item.stage, { x: 0.5, y: yPos, fontSize: 14, bold: true, color: '00B36B' });
-         slide5.addText(`GPA: ${item.categoryContent.gpa}`, { x: 0.8, y: yPos + 0.4, w: 8, fontSize: 10 });
-         slide5.addText(`科研: ${item.categoryContent.research}`, { x: 0.8, y: yPos + 0.7, w: 8, fontSize: 10 });
-      });
-
-      await pres.writeFile({ fileName: `高顿去保研_规划报告_${userInfo.name}.pptx` });
-
-    } catch (e) {
-      console.error(e);
-      alert("PPT生成失败");
-    } finally {
-      setPptGenerating(false);
-    }
-  };
-
   const planningItems = Array.isArray(aiData.planning) ? aiData.planning : [];
   const targetSchools = typeof aiData.targetSchools === 'object' ? aiData.targetSchools : { "院校推荐": String(aiData.targetSchools) };
   const bonusSchemes = aiData.bonusScheme || [];
@@ -533,15 +435,6 @@ const Report = ({ userInfo, schoolData, aiData }: { userInfo: UserInfo, schoolDa
       
       {/* Floating Download Buttons */}
       <div className="fixed bottom-10 right-10 z-50 flex flex-col gap-4">
-        <button 
-          onClick={handleDownloadPPT}
-          disabled={pptGenerating}
-          className="bg-[#FF6600] text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 hover:bg-[#e65c00] transition-all font-bold text-lg border-2 border-white hover:scale-105"
-        >
-          {pptGenerating ? <Loader2 className="animate-spin" size={24} /> : <Presentation size={24}/>}
-          {pptGenerating ? "PPT 生成中..." : "下载 PPT 报告 (推荐)"}
-        </button>
-
         <button 
           onClick={handleDownloadPDF}
           disabled={downloading}
@@ -681,10 +574,10 @@ const Report = ({ userInfo, schoolData, aiData }: { userInfo: UserInfo, schoolDa
                         ))}
                       </div>
 
-                      {/* Radar Chart (With Ref for PPT Capture) */}
+                      {/* Radar Chart */}
                       <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col items-center">
                          <div className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-4">五维综合竞争力模型</div>
-                         <div className="w-full h-64" ref={radarRef}>
+                         <div className="w-full h-64">
                             <ResponsiveContainer width="100%" height="100%">
                               <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
                                 <PolarGrid stroke="#e5e7eb" strokeWidth={1} />
